@@ -6,7 +6,7 @@
         <h4>{{ data.temperature }} °{{ data.temperatureUnit }}</h4>
         <p class="card-text">{{ data.detailedForecast }}</p>
         <a href="{{ url_for('specific_day', day=data.startTime.split('T')[0], address_string=geocoords, **request.args) }}" class="btn btn-primary">
-            Go somewhere
+            lHourly
         </a>
     </div>
 </div>
