@@ -47,6 +47,14 @@ def specific_day():
     date   = request.args.get('day')
     coords = request.args.get('address_string')
 
+    if request.args.get('address'):
+        address_string = 'in ' + requests.get(
+            f'https://maps.googleapis.com/maps/api/geocode/json?address={request.args["address"]}&key={geocoding_api_key}'
+        ).json()['results'][0]['formatted_address']
+    
+    else:
+        address_string = ''
+
     date_arr = date.split('-')
 
     months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
@@ -70,7 +78,7 @@ def specific_day():
     
     forecast = [x for x in forecast_request if x['startTime'].split('T')[0]==date]
 
-    return render_template('hourly.html', forecast=forecast, date_string=date_string)
+    return render_template('hourly.html', forecast=forecast, date_string=date_string, address_string=address_string)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True)
