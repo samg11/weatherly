@@ -1,0 +1,13 @@
+{% macro forecast_card(data) %}
+<div class="card forecast-card" style="width: 18rem;">
+    <img src="{{ data.icon }}&size=large" class="card-img-top" alt="{{ data.shortForecast }}">
+    <div class="card-body">
+        <h5 class="card-title">{{ data.name }}</h5>
+        <h4>{{ data.temperature }} °{{ data.temperatureUnit }}</h4>
+        <p class="card-text">{{ data.detailedForecast }}</p>
+        <a href="{{ url_for('specific_day', day=data.startTime.split('T')[0], address_string=geocoords, **request.args) }}" class="btn btn-primary">
+            Go somewhere
+        </a>
+    </div>
+</div>
+{% endmacro %}

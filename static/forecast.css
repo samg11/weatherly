@@ -1,0 +1,7 @@
+.container-fluid {
+  overflow-x: scroll;
+}
+
+.forecast-card {
+  margin: 0 15px;
+}

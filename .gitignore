@@ -1,0 +1,9 @@
+# virtualenv
+venv
+.venv
+env
+ENV
+
+# environment variables
+.env
+/app.yaml

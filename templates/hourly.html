@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %} Hourly {% endblock %}
+
+
+{% block header %}
+
+<h1> Hourly data for {{ date_string }} </h1>
+
+{% endblock %}
+
+{% block content %}
+
+<table class="table">
+
+    <thead>
+        <tr>
+          <th scope="col">Time</th>
+          <th scope="col">Temperature</th>
+          <th scope="col">Forecast</th>
+          <th class="hourly-weather-icon-header" scope="col">Icon</th>
+        </tr>
+      </thead>
+      <tbody>
+          {% for hour in forecast %}
+          {% set time = ":".join(hour.startTime.split('T')[1].split('-')[0].split(':')[0:-1]) %}
+          <tr>
+            <th scope="row">{{ time }}</th>
+            <td>{{ hour.temperature }} °{{ hour.temperatureUnit }}</td>
+            <td>{{ hour.shortForecast }}</td>
+            <td class="hourly-weather-icon"><img src="{{ hour.icon }}" alt="{{ hour.shortForecast }}"></td>
+          </tr>
+          {% endfor %}
+      </tbody>
+  </table>
+
+{% endblock %}
