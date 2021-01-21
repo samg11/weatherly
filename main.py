@@ -1,4 +1,4 @@
-from flask import Flask, render_template, jsonify, request, url_for, redirect, flash
+from flask import Flask, render_template, jsonify, request, url_for, redirect, flash, session
 import os
 import requests
 import json
@@ -68,10 +68,6 @@ def specific_day(date, location):
     year  = date_arr[0]
 
     date_string = f'{month} {day}, {year}'
-        
-    print(
-        f'https://maps.googleapis.com/maps/api/geocode/json?address={location}&key={geocoding_api_key}'
-    )
 
     geocoding_request = requests.get(
         f'https://maps.googleapis.com/maps/api/geocode/json?address={location}&key={geocoding_api_key}'
@@ -80,6 +76,7 @@ def specific_day(date, location):
     address_string = geocoding_request['formatted_address']
 
     coords      = geocoding_request["geometry"]["location"]
+
     premise = False
     if 'premise' in geocoding_request['types']:
         premise = True
@@ -99,14 +96,26 @@ def specific_day(date, location):
             print(requests.get(request_url).json())
             return redirect(url_for('index'))
 
-    
-    forecast = [x for x in forecast_request if x['startTime'].split('T')[0]==date]
+    if session.get('DONT_SHOW_NIGHT'):
+        forecast = [x for x in forecast_request if x['startTime'].split('T')[0]==date and x['isDaytime']==True]
+    else:
+        forecast = [x for x in forecast_request if x['startTime'].split('T')[0]==date]
     return render_template('hourly.html',
+        date=date,
+        location=location,
         coords=coords,
         forecast=forecast,
         date_string=date_string,
         address_string=address_string,
-        premise=premise)
+        premise=premise,
+        dont_show_night=session.get('DONT_SHOW_NIGHT'))
+
+@app.route('/night/<date>/<location>')
+def night(date, location):
+    session['DONT_SHOW_NIGHT'] = not session.get('DONT_SHOW_NIGHT')
+
+    return redirect(url_for('specific_day', date=date, location=location))
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True)
