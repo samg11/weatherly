@@ -12,4 +12,4 @@ ENV
 __pycache__
 
 # notes
-notes.txt
+_notes.txt
