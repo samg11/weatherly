@@ -75,7 +75,7 @@ def specific_day(date, location):
 
     address_string = geocoding_request['formatted_address']
 
-    coords      = geocoding_request["geometry"]["location"]
+    coords = geocoding_request["geometry"]["location"]
 
     premise = False
     if 'premise' in geocoding_request['types']:

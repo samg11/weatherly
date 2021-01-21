@@ -10,3 +10,6 @@ ENV
 
 # cache
 __pycache__
+
+# notes
+notes.txt
