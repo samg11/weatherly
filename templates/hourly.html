@@ -22,7 +22,12 @@
 
 {% block header %}
 
-<h1> Hourly data for {{ date_string }} in {{ address_string }}</h1>
+<h1>
+  Hourly data for {{ date_string }}
+  {% if not premise %}
+    in {{ address_string }}
+  {% endif %}
+</h1>
 <a href="{{ url_for('weatherdata', location=address_string, **request.args) }}">{{ url_for('weatherdata') }}</a>
 {% endblock %}
 

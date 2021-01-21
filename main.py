@@ -80,8 +80,11 @@ def specific_day(date, location):
     address_string = geocoding_request['formatted_address']
 
     coords      = geocoding_request["geometry"]["location"]
-    request_url = generate_weather_url(coords, hourly=True)
+    premise = False
+    if 'premise' in geocoding_request['types']:
+        premise = True
 
+    request_url = generate_weather_url(coords, hourly=True)
     
     forecast_request = requests.get(request_url).json().get('properties')
     if forecast_request: forecast_request = forecast_request.get('periods')
@@ -98,8 +101,12 @@ def specific_day(date, location):
 
     
     forecast = [x for x in forecast_request if x['startTime'].split('T')[0]==date]
-
-    return render_template('hourly.html', coords=coords, forecast=forecast, date_string=date_string, address_string=address_string)
+    return render_template('hourly.html',
+        coords=coords,
+        forecast=forecast,
+        date_string=date_string,
+        address_string=address_string,
+        premise=premise)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True)
