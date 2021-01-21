@@ -24,6 +24,7 @@ def index():
 def weatherdata():
 
     location = request.args.get('location')
+    original_location = location
 
     geocoded = requests.get(
         f'https://maps.googleapis.com/maps/api/geocode/json?address={location}&key={geocoding_api_key}'
@@ -54,7 +55,8 @@ def weatherdata():
         forecast=forecast,
         address=address_string,
         data=forecast_data,
-        location=location)
+        location=location,
+        link_location=original_location)
 
 @app.route('/weatherdata/specific/<date>/<location>')
 def specific_day(date, location):
@@ -108,7 +110,8 @@ def specific_day(date, location):
         date_string=date_string,
         address_string=address_string,
         premise=premise,
-        dont_show_night=session.get('DONT_SHOW_NIGHT'))
+        dont_show_night=session.get('DONT_SHOW_NIGHT')
+        )
 
 @app.route('/night/<date>/<location>')
 def night(date, location):
