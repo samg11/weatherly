@@ -31,7 +31,7 @@
 {% endblock %}
 
 {% block content %}
-<a href="{{ url_for('weatherdata', location=address_string, **request.args) }}" class="btn btn-outline-primary">
+<a href="{{ url_for('weatherdata', location=link_location, **request.args) }}" class="btn btn-outline-primary">
   This Week
 </a>
 

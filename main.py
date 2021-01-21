@@ -108,6 +108,7 @@ def specific_day(date, location):
         coords=coords,
         forecast=forecast,
         date_string=date_string,
+        link_location=location,
         address_string=address_string,
         premise=premise,
         dont_show_night=session.get('DONT_SHOW_NIGHT')
