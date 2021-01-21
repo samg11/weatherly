@@ -7,3 +7,6 @@ ENV
 # environment variables
 .env
 /app.yaml
+
+# cache
+__pycache__
