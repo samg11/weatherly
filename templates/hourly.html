@@ -1,6 +1,24 @@
+{% macro get_time(t) %}
+  {% if t == '00:00' %}
+    {% set t = 'MIDNIGHT' %}
+  {% elif t == '12:00' %}
+    {% set t = 'NOON' %}
+  {% elif t.split(':')[0]|int < 12 %}
+    {% set t = t + ' AM' %}
+  {% else %}
+    {% set t = '%d:%s'|format(t.split(':')[0]|int - 12, t.split(':')[1]) + ' PM' %}
+  {% endif %}
+
+  {% if t.split()[0] == '0' %}
+    {{ t[1:] }}
+
+  {% else %}
+    {{ t }}
+  {% endif %}
+{% endmacro %}
+
 {% extends "base.html" %}
 {% block title %} Hourly {% endblock %}
-
 
 {% block header %}
 
@@ -22,7 +40,7 @@
       </thead>
       <tbody>
           {% for hour in forecast %}
-          {% set time = ":".join(hour.startTime.split('T')[1].split('-')[0].split(':')[0:-1]) %}
+          {% set time = get_time(":".join(hour.startTime.split('T')[1].split('-')[0].split(':')[0:-1])) %}
           <tr>
             <th scope="row">{{ time }}</th>
             <td>{{ hour.temperature }} °{{ hour.temperatureUnit }}</td>
