@@ -22,8 +22,8 @@
 
 {% block header %}
 
-<h1> Hourly data for {{ date_string }} {{ address_string }}</h1>
-
+<h1> Hourly data for {{ date_string }} in {{ address_string }}</h1>
+<a href="{{ url_for('weatherdata', location=address_string, **request.args) }}">{{ url_for('weatherdata') }}</a>
 {% endblock %}
 
 {% block content %}

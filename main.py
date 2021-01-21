@@ -1,13 +1,20 @@
-from flask import Flask, render_template, jsonify, request, url_for
+from flask import Flask, render_template, jsonify, request, url_for, redirect, flash
 import os
 import requests
+import json
 
 app = Flask(__name__)
+app.secret_key = 'test'
 
 geocoding_api_key = os.environ.get('WEATHERLY_GEOCODING_API_KEY')
 
-def generate_weather_url(longitude, latitude, hourly=False):
-    return f'https://api.weather.gov/points/{longitude},{latitude}/forecast{"/hourly"if hourly else""}'
+def generate_weather_url(location, hourly=False):
+    if type(location) == list:
+        return f'https://api.weather.gov/points/{location[0]},{location[1]}/forecast{"/hourly"if hourly else""}'
+    
+    elif type(location) == dict:
+        return f'https://api.weather.gov/points/{location["lat"]},{location["lng"]}/forecast{"/hourly"if hourly else""}'
+    return f'https://api.weather.gov/points/{location}/forecast{"/hourly"if hourly else""}'
 
 @app.route('/')
 def index():
@@ -16,22 +23,30 @@ def index():
 @app.route('/weatherdata')
 def weatherdata():
 
-    address = request.args.get('address')
+    location = request.args.get('location')
 
     geocoded = requests.get(
-        f'https://maps.googleapis.com/maps/api/geocode/json?address={address}&key={geocoding_api_key}'
+        f'https://maps.googleapis.com/maps/api/geocode/json?address={location}&key={geocoding_api_key}'
     ).json()['results'][0]
     
     location       = geocoded['geometry']['location']
     address_string = geocoded['formatted_address']
 
     request_url = generate_weather_url(
-        location['lat'],
-        location['lng'])
+        [location["lat"],
+        location["lng"]])
 
-    print(request_url)
-
-    forecast = requests.get(request_url).json()['properties']['periods']
+    forecast_request_tries = 0
+    max_forecast_request_tries = 10
+    forecast = requests.get(request_url).json().get('properties')
+    if forecast: forecast = forecast.get('periods')
+    while not forecast:
+        forecast = requests.get(request_url).json().get('properties')
+        if forecast: forecast = forecast.get('periods')
+        forecast_request_tries += 1
+        if forecast_request_tries >= max_forecast_request_tries:
+            flash('Something went wrong.')
+            return redirect(url_for('index', **request.args))
 
     forecast_data = forecast[0:15]
 
@@ -39,21 +54,10 @@ def weatherdata():
         forecast=forecast,
         address=address_string,
         data=forecast_data,
-        geocoords=f'{location["lat"]},{location["lng"]}')
+        location=location)
 
-@app.route('/weatherdata/day')
-def specific_day():
-    
-    date   = request.args.get('day')
-    coords = request.args.get('address_string')
-
-    if request.args.get('address'):
-        address_string = 'in ' + requests.get(
-            f'https://maps.googleapis.com/maps/api/geocode/json?address={request.args["address"]}&key={geocoding_api_key}'
-        ).json()['results'][0]['formatted_address']
-    
-    else:
-        address_string = ''
+@app.route('/weatherdata/specific/<date>/<location>')
+def specific_day(date, location):
 
     date_arr = date.split('-')
 
@@ -64,21 +68,38 @@ def specific_day():
     year  = date_arr[0]
 
     date_string = f'{month} {day}, {year}'
+        
+    print(
+        f'https://maps.googleapis.com/maps/api/geocode/json?address={location}&key={geocoding_api_key}'
+    )
 
-    coords.replace(' ', '')
-    coords = coords.split(',')
+    geocoding_request = requests.get(
+        f'https://maps.googleapis.com/maps/api/geocode/json?address={location}&key={geocoding_api_key}'
+    ).json()['results'][0]
 
-    request_url = generate_weather_url(
-        coords[0],
-        coords[1],
-        hourly=True)
+    address_string = geocoding_request['formatted_address']
 
-    forecast_request = requests.get(request_url).json()['properties']['periods']
+    coords      = geocoding_request["geometry"]["location"]
+    request_url = generate_weather_url(coords, hourly=True)
+
+    
+    forecast_request = requests.get(request_url).json().get('properties')
+    if forecast_request: forecast_request = forecast_request.get('periods')
+    forecast_request_tries = 0
+    max_forecast_request_tries = 10
+    while not forecast_request:
+        forecast_request = requests.get(request_url).json().get('properties')
+        if forecast_request: forecast_request = forecast_request.get('periods')
+        forecast_request_tries += 1
+        if forecast_request_tries >= max_forecast_request_tries:
+            flash('Something went wrong.')
+            print(requests.get(request_url).json())
+            return redirect(url_for('index'))
 
     
     forecast = [x for x in forecast_request if x['startTime'].split('T')[0]==date]
 
-    return render_template('hourly.html', forecast=forecast, date_string=date_string, address_string=address_string)
+    return render_template('hourly.html', coords=coords, forecast=forecast, date_string=date_string, address_string=address_string)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True)
