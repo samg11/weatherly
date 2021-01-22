@@ -1,9 +1,9 @@
 const currentLocationButton = document.querySelectorAll('.getCurrentLocation');
 
 if (!navigator.geolocation) {
-    currentLocationButton.classlist.toggle('active');
-    currentLocationButton.classlist.toggle('disabled');
-    currentLocationButton.disabled = true;
+    for (const button of currentLocationButton) {
+        button.disabled = true;
+    }
 }
 
 function getCurrentLocation() {
