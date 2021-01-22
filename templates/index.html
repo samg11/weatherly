@@ -10,7 +10,7 @@
 {% block content %}
 
 <form action="{{ url_for('weatherdata') }}" method="get">
-    <input class="input" type="text" placeholder="Location" name="location">
+    <input class="input" type="text" placeholder="Location" autocomplete="address-level2" name="location">
     <input type="submit" class="btn btn-outline-primary" value="Get Weather Data">
     <button type="button" class="btn btn-outline-secondary getCurrentLocation">Use Current Location</button>
 </form>

@@ -33,7 +33,7 @@
                   </li>
                 </ul>
                 <form action="{{ url_for('weatherdata') }}" method="get" class="d-flex">
-                  <input class="form-control me-2" type="search" placeholder="Location" name="location" aria-label="Search">
+                  <input class="form-control me-2" type="search" autocomplete="address-level2" placeholder="Location" name="location" aria-label="Search">
                   <input class="btn btn-outline-success" type="submit" value="Get Weather Data">
                 </form>
               </div>
