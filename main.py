@@ -34,8 +34,12 @@ def weatherdata():
     forecast_request_tries = 0
     max_forecast_request_tries = 10
 
-    forecast = requests.get(request_url).json()
-    forecast = forecast.get('properties')
+    try:
+        forecast = requests.get(request_url).json()
+        forecast = forecast.get('properties')
+
+    except json.decoder.JSONDecodeError:
+        return redirect(url_for('weatherdata', **request.args))
 
     if forecast: forecast = forecast.get('periods')
     while not forecast:
@@ -72,7 +76,13 @@ def specific_day(date, location):
 
     request_url = generate_weather_url(geocode['coords'], hourly=True)
     
-    forecast_request = requests.get(request_url).json().get('properties')
+    try:
+        forecast_request = requests.get(request_url).json()
+        forecast_request = forecast_request.get('properties')
+
+    except json.decoder.JSONDecodeError:
+        return redirect(url_for('weatherdata', date=date, location=location))
+
     if forecast_request: forecast_request = forecast_request.get('periods')
     forecast_request_tries = 0
     max_forecast_request_tries = 10
