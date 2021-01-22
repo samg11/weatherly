@@ -2,6 +2,7 @@ from flask import Flask, render_template, jsonify, request, url_for, redirect, f
 import os
 import requests
 import json
+from geocoding import geocoding
 
 app = Flask(__name__)
 app.secret_key = 'test'
@@ -22,24 +23,20 @@ def index():
 
 @app.route('/weatherdata')
 def weatherdata():
-
+    # using_current_location = int(bool(request.args.get('CURRENT_LOCATION')))
     location = request.args.get('location')
     original_location = location
 
-    geocoded = requests.get(
-        f'https://maps.googleapis.com/maps/api/geocode/json?address={location}&key={geocoding_api_key}'
-    ).json()['results'][0]
-    
-    location       = geocoded['geometry']['location']
-    address_string = geocoded['formatted_address']
+    geocode = geocoding(location)
 
-    request_url = generate_weather_url(
-        [location["lat"],
-        location["lng"]])
-
+    request_url = generate_weather_url(geocode['coords'])
+    print(request_url)
     forecast_request_tries = 0
     max_forecast_request_tries = 10
-    forecast = requests.get(request_url).json().get('properties')
+
+    forecast = requests.get(request_url).json()
+    forecast = forecast.get('properties')
+
     if forecast: forecast = forecast.get('periods')
     while not forecast:
         forecast = requests.get(request_url).json().get('properties')
@@ -50,13 +47,13 @@ def weatherdata():
             return redirect(url_for('index', **request.args))
 
     forecast_data = forecast[0:15]
-
     return render_template('weatherdata.html',
         forecast=forecast,
-        address=address_string,
+        address=geocode['string'],
         data=forecast_data,
         location=location,
-        link_location=original_location)
+        link_location=original_location
+    )
 
 @app.route('/weatherdata/specific/<date>/<location>')
 def specific_day(date, location):
@@ -71,19 +68,9 @@ def specific_day(date, location):
 
     date_string = f'{month} {day}, {year}'
 
-    geocoding_request = requests.get(
-        f'https://maps.googleapis.com/maps/api/geocode/json?address={location}&key={geocoding_api_key}'
-    ).json()['results'][0]
+    geocode = geocoding(location)
 
-    address_string = geocoding_request['formatted_address']
-
-    coords = geocoding_request["geometry"]["location"]
-
-    premise = False
-    if 'premise' in geocoding_request['types']:
-        premise = True
-
-    request_url = generate_weather_url(coords, hourly=True)
+    request_url = generate_weather_url(geocode['coords'], hourly=True)
     
     forecast_request = requests.get(request_url).json().get('properties')
     if forecast_request: forecast_request = forecast_request.get('periods')
@@ -105,12 +92,11 @@ def specific_day(date, location):
     return render_template('hourly.html',
         date=date,
         location=location,
-        coords=coords,
+        coords=geocode['coords'],
         forecast=forecast,
         date_string=date_string,
         link_location=location,
-        address_string=address_string,
-        premise=premise,
+        address_string=geocode['string'],
         dont_show_night=session.get('DONT_SHOW_NIGHT')
         )
 
