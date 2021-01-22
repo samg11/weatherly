@@ -19,6 +19,12 @@ def geocoding(location):
             geocode['string'] = ac[i].get('short_name')
             break
 
+    if geocode['string'] == geocoded['formatted_address']:
+        for i in range(len(ac)):
+            if 'address_level2' in ac[i]['types']:
+                geocode['string'] = ac[i].get('short_name')
+                break
+
     geocode['coords'] = coords
 
     return geocode
