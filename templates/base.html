@@ -9,6 +9,11 @@
     <title>{% block title %}{% endblock %}</title>
     {% block head %}{% endblock %}
     <script defer src="{{ url_for('static', filename='location.js') }}"></script>
+    
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/8.2.4/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.2.4/firebase-analytics.js"></script>
+    <script src="{{ url_for('static', filename='firebaseConfig.js') }}"></script>
 </head>
 <body>
     <header>
