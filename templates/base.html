@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='responsive.css') }}">
     <title>{% block title %}{% endblock %}</title>
     {% block head %}{% endblock %}
+    <script defer src="{{ url_for('static', filename='location.js') }}"></script>
 </head>
 <body>
     <header>
@@ -20,6 +21,10 @@
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                   <li class="nav-item">
                     <a class="nav-link active" aria-current="page" href="/">Home</a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="link nav-link active getCurrentLocation" aria-current="page">Current Location</a>
+                  </li>
                 </ul>
                 <form action="{{ url_for('weatherdata') }}" method="get" class="d-flex">
                   <input class="form-control me-2" type="search" placeholder="Location" name="location" aria-label="Search">

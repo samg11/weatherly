@@ -3,9 +3,12 @@ import os
 import requests
 import json
 from geocoding import geocoding
+from current_location import current_location
 
 app = Flask(__name__)
 app.secret_key = 'test'
+
+app.register_blueprint(current_location, url_prefix='/current_location')
 
 geocoding_api_key = os.environ.get('WEATHERLY_GEOCODING_API_KEY')
 
